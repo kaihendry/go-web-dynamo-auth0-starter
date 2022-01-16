@@ -110,7 +110,7 @@ func newServer(local bool) *server {
 	s.router.Handle("/", s.list())
 	s.router.Handle("/login", s.login())
 	s.router.Handle("/logout", s.logout())
-	s.router.Handle("/user", s.user())
+	s.router.Handle("/user", s.IsAuthenticated(s.user()))
 	s.router.Handle("/callback", s.callback())
 	s.router.Handle("/add", s.add())
 
@@ -130,11 +130,10 @@ func main() {
 		log.Info("starting cloud server")
 		err = gateway.ListenAndServe("", s.router)
 	} else {
+		log.Info("starting local server 😎")
 		err = http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("PORT")), s.router)
 	}
-	log.Info(".... starting")
 	log.WithError(err).Fatal("error listening")
-	log.Info(".... ending")
 }
 
 // Authenticator is used to authenticate our users.
