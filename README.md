@@ -29,3 +29,5 @@ https://s.natalian.org/2022-01-16/auth-forum.mp4
 4. Did I correctly handle / validate the profile in [middleware](middleware.go)?
 5. How can I be confident the profile hasn't been manipulated?
 6. Profile appears to be an interface, is there a proper struct for it?
+7. The default UX with the browser is poor, Chrome generally offers [the wrong password](https://s.natalian.org/2022-01-16/wrong-password.png), why is that?
+8. The Auth0 server is in the US, could it not be in Singapore?
