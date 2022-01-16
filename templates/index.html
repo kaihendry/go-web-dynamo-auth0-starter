@@ -2,26 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <style>
-      html {
-        max-width: 38rem;
-        padding: 2rem;
-        margin: auto;
-        line-height: 1.5rem;
-        font-size: 24px;
-      }
-      .colours ol {
-        display: table;
-      }
-      .colours li {
-        display: table-row;
-      }
-      .colours li > * {
-        display: table-cell;
-        padding: 2px 5px;
-      }
-    </style>
-    <title>Colours</title>
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+    <title>go-web-dynamo-auth0-starter</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="data:," />
   </head>
@@ -43,17 +25,10 @@
       {{ end }}
     </ol>
 
-    {{ if .Selection -}}
     <p>
-      <a
-        href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/howitworks-ttl.html"
-        >TTL typically deletes expired items within 48 hours of expiration.</a
+      <a href="https://github.com/kaihendry/go-web-dynamo-auth0-starter"
+        >Source</a
       >
-    </p>
-    {{ end }}
-
-    <p>
-      <a href="https://github.com/kaihendry/go-web-dynamo-starter">Source</a>
     </p>
   </body>
 </html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+    {{ if .Profile }}
+    <!-- No first name ?? -->
+    <title>Hello {{ index .Profile "nickname" }}</title>
+    {{ else }}
+    <title>No one logged in</title>
+    {{ end }}
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="data:," />
+  </head>
+  <body>
+    {{ if .Profile }} <img src="{{ index .Profile "picture" }}" />
+    <button onclick="window.location.href='/logout';">Log out</button>
+    {{ else }}
+    <button onclick="window.location.href='/login';">Log in</button>
+    {{ end }}
+  </body>
+</html>

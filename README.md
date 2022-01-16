@@ -1,6 +1,10 @@
-Goal: Develop a AWS dynamodb Web application locally
+Goal: Develop a Go start auth starter [without Gin framework](https://github.com/auth0-samples/auth0-golang-web-app/tree/master/01-Login) and learn along the way ...
 
-Runs under an AWS_PROFILE called "mine", you will have to change that to yours when deploying to your AWS account.
+https://www.youtube.com/watch?v=bpa_GQT16uM&feature=youtu.be
+
+https://twitter.com/kaihendry/status/1482526555402571776
+
+https://manage.auth0.com/dashboard/us/dev-h3aod060/users/YXV0aDAlN0M2MWUzN2JiNDY5MGNkMTAwNjg2Zjg0ZTI
 
 Start dynamodb server
 

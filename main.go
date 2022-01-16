@@ -1,6 +1,9 @@
 package main
 
 import (
+	"context"
+	"encoding/gob"
+	"errors"
 	"fmt"
 	"html/template"
 	"image/color"
@@ -12,6 +15,10 @@ import (
 	"github.com/apex/log"
 	jsonhandler "github.com/apex/log/handlers/json"
 	"github.com/apex/log/handlers/text"
+	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/gorilla/sessions"
+	"github.com/joho/godotenv"
+	"golang.org/x/oauth2"
 
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
@@ -26,6 +33,8 @@ type Record struct {
 type server struct {
 	router *http.ServeMux
 	client *dynamodb.Client
+	auth   *Authenticator
+	store  *sessions.CookieStore
 }
 
 func (record *Record) TimeSinceCreation() string {
@@ -70,6 +79,20 @@ func (record *Record) TransparentBG() template.CSS {
 func newServer(local bool) *server {
 	s := &server{router: &http.ServeMux{}}
 
+	gob.Register(map[string]interface{}{})
+	s.store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
+
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Failed to load the env vars: %v", err)
+	}
+
+	auth, err := New()
+	if err != nil {
+		log.Fatalf("Failed to initialize the authenticator: %v", err)
+	}
+
+	s.auth = auth
+
 	if local {
 		log.SetHandler(text.Default)
 		log.Info("local mode")
@@ -81,8 +104,13 @@ func newServer(local bool) *server {
 	}
 
 	s.router.Handle("/", s.list())
-	s.router.Handle("/latest", s.latest())
+	s.router.Handle("/login", s.login())
+	s.router.Handle("/logout", s.logout())
+	s.router.Handle("/user", s.user())
+	s.router.Handle("/callback", s.callback())
 	s.router.Handle("/add", s.add())
+
+	// k
 
 	return s
 }
@@ -103,4 +131,48 @@ func main() {
 	log.Info(".... starting")
 	log.WithError(err).Fatal("error listening")
 	log.Info(".... ending")
+}
+
+// Authenticator is used to authenticate our users.
+type Authenticator struct {
+	*oidc.Provider
+	oauth2.Config
+}
+
+// New instantiates the *Authenticator.
+func New() (*Authenticator, error) {
+	provider, err := oidc.NewProvider(
+		context.Background(),
+		"https://"+os.Getenv("AUTH0_DOMAIN")+"/",
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	conf := oauth2.Config{
+		ClientID:     os.Getenv("AUTH0_CLIENT_ID"),
+		ClientSecret: os.Getenv("AUTH0_CLIENT_SECRET"),
+		RedirectURL:  os.Getenv("AUTH0_CALLBACK_URL"),
+		Endpoint:     provider.Endpoint(),
+		Scopes:       []string{oidc.ScopeOpenID, "profile"},
+	}
+
+	return &Authenticator{
+		Provider: provider,
+		Config:   conf,
+	}, nil
+}
+
+// VerifyIDToken verifies that an *oauth2.Token is a valid *oidc.IDToken.
+func (a *Authenticator) VerifyIDToken(ctx context.Context, token *oauth2.Token) (*oidc.IDToken, error) {
+	rawIDToken, ok := token.Extra("id_token").(string)
+	if !ok {
+		return nil, errors.New("no id_token field in oauth2 token")
+	}
+
+	oidcConfig := &oidc.Config{
+		ClientID: a.ClientID,
+	}
+
+	return a.Verifier(oidcConfig).Verify(ctx, rawIDToken)
 }
