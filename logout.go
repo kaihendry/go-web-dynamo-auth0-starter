@@ -21,11 +21,15 @@ func (s *server) logout() http.HandlerFunc {
 		}
 
 		scheme := "http"
-		if r.TLS != nil {
+		if r.Header.Get("X-Forwarded-Proto") == "https" {
 			scheme = "https"
 		}
 
-		// request host
+		log.WithFields(log.Fields{
+			"scheme":  scheme,
+			"headers": r.Header,
+		}).Info("setting scheme")
+
 		log.WithField("host", r.Host).Info("returning to")
 		returnTo, err := url.Parse(scheme + "://" + r.Host)
 		if err != nil {

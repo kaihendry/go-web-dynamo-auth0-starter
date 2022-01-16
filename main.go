@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"embed"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -16,12 +17,15 @@ import (
 	jsonhandler "github.com/apex/log/handlers/json"
 	"github.com/apex/log/handlers/text"
 	"github.com/coreos/go-oidc/v3/oidc"
+	"github.com/driftprogramming/godotenv"
 	"github.com/gorilla/sessions"
-	"github.com/joho/godotenv"
 	"golang.org/x/oauth2"
 
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
+
+//go:embed envs/*
+var envs embed.FS
 
 type Record struct {
 	ID      string     `dynamodbav:"id" json:"id"`
@@ -82,7 +86,7 @@ func newServer(local bool) *server {
 	gob.Register(map[string]interface{}{})
 	s.store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
-	if err := godotenv.Load(); err != nil {
+	if err := godotenv.Load(envs, "envs/.env"); err != nil {
 		log.Fatalf("Failed to load the env vars: %v", err)
 	}
 
