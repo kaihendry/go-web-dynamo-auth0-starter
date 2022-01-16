@@ -27,7 +27,7 @@ https://s.natalian.org/2022-01-16/auth-forum.mp4
 2. Is "sub" the correct way to identify a user?
 3. What happens if user the logs in from Github/Gmail etc... are the identities merged?
 4. Did I correctly handle / validate the profile in [middleware](middleware.go)?
-5. How can I be confident the profile hasn't been manipulated?
+5. How can I be confident the profile (cookie?) has not been manipulated?
 6. Profile appears to be an interface, is there a proper struct for it?
 7. The default UX with the browser is poor, Chrome generally offers [the wrong password](https://s.natalian.org/2022-01-16/wrong-password.png), why is that?
 8. The Auth0 server is in the US, could it not be in Singapore?
