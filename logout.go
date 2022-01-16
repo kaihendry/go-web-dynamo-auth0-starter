@@ -27,7 +27,6 @@ func (s *server) logout() http.HandlerFunc {
 
 		log.WithFields(log.Fields{
 			"scheme":  scheme,
-			"headers": r.Header,
 		}).Info("setting scheme")
 
 		log.WithField("host", r.Host).Info("returning to")

@@ -17,6 +17,16 @@ var decoder = schema.NewDecoder()
 
 func (s *server) add() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+
+		session, err := s.store.Get(r, "session-name")
+		if err != nil {
+			log.WithError(err).Error("error getting session")
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		profile := session.Values["profile"]
+		log.WithField("profile", profile).Info("user")
+
 		// Handle post only
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
@@ -26,7 +36,7 @@ func (s *server) add() http.HandlerFunc {
 		// parse body to a record
 		var rec Record
 
-		err := r.ParseForm()
+		err = r.ParseForm()
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
@@ -39,7 +49,9 @@ func (s *server) add() http.HandlerFunc {
 			return
 		}
 
-		rec.ID = r.RemoteAddr
+		// access sub from profile
+		sub := profile.(map[string]interface{})["sub"].(string)
+		rec.ID = sub
 		rec.Created = time.Now()
 
 		// https://github.com/aws/aws-sdk-go/issues/2040#issuecomment-1004638139

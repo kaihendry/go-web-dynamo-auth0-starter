@@ -34,6 +34,5 @@ func (s *server) user() http.HandlerFunc {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			log.WithError(err).Fatal("Failed to execute templates")
 		}
-
 	}
 }

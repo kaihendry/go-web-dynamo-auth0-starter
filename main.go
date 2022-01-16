@@ -27,6 +27,8 @@ import (
 //go:embed envs/*
 var envs embed.FS
 
+var local = true
+
 type Record struct {
 	ID      string     `dynamodbav:"id" json:"id"`
 	Created time.Time  `dynamodbav:"created,unixtime" json:"created"`
@@ -80,7 +82,7 @@ func (record *Record) TransparentBG() template.CSS {
 	return template.CSS(fmt.Sprintf("rgba(%d, %d, %d, 0.5)", c.R, c.G, c.B))
 }
 
-func newServer(local bool) *server {
+func newServer() *server {
 	s := &server{router: &http.ServeMux{}}
 
 	gob.Register(map[string]interface{}{})
@@ -112,9 +114,7 @@ func newServer(local bool) *server {
 	s.router.Handle("/logout", s.logout())
 	s.router.Handle("/user", s.IsAuthenticated(s.user()))
 	s.router.Handle("/callback", s.callback())
-	s.router.Handle("/add", s.add())
-
-	// k
+	s.router.Handle("/add", s.IsAuthenticated(s.add()))
 
 	return s
 }
@@ -122,7 +122,8 @@ func newServer(local bool) *server {
 func main() {
 	_, awsDetected := os.LookupEnv("AWS_LAMBDA_FUNCTION_NAME")
 	log.WithField("awsDetected", awsDetected).Info("starting up")
-	s := newServer(!awsDetected)
+	local = !awsDetected
+	s := newServer()
 
 	var err error
 
@@ -158,6 +159,10 @@ func New() (*Authenticator, error) {
 		RedirectURL:  os.Getenv("AUTH0_CALLBACK_URL"),
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
+	}
+
+	if local {
+		conf.RedirectURL = "http://localhost:3000/callback"
 	}
 
 	return &Authenticator{

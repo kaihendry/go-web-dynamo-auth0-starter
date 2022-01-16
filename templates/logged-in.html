@@ -1,22 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
-    {{ if .Profile }}
-    <!-- No first name ?? -->
-    <title>Hello {{ index .Profile "nickname" }}</title>
-    {{ else }}
-    <title>No one logged in</title>
-    {{ end }}
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" href="data:," />
-  </head>
-  <body>
-    {{ if .Profile }} <img src="{{ index .Profile "picture" }}" />
-    <button onclick="window.location.href='/logout';">Log out</button>
-    {{ else }}
-    <button onclick="window.location.href='/login';">Log in</button>
-    {{ end }}
-  </body>
+<head>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://cdn.simplecss.org/simple.min.css" />
+{{ if .Profile }}
+<!-- No first name ?? -->
+<title>Hello {{ index .Profile "nickname" }}</title>
+{{ else }}
+<title>No one logged in</title>
+{{ end }}
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:," />
+</head>
+<body>
+<nav>
+{{ if .Profile }}
+<a href="/logout">Log out</a>
+{{ else }}
+<p>IIUC there is no way this would be seen since the middle ware would prevent a non logged in user from seeing this page</p>
+<a href="/login">Log in</a>
+{{ end }}
+</nav>
+
+<!-- this form should be protected by the middle ware -->
+<form action="/add" method="POST">
+<input type="color" name="Color" />
+<input type="submit" />
+</form>
+
+</body>
 </html>
