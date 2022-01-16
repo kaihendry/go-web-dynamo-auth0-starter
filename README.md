@@ -1,4 +1,6 @@
-Goal: Develop a Go start auth starter [without Gin framework](https://github.com/auth0-samples/auth0-golang-web-app/tree/master/01-Login) and learn along the way ...
+Goal: Develop a Go start auth starter [without Gin
+framework](https://github.com/auth0-samples/auth0-golang-web-app/tree/master/01-Login)
+and learn along the way ...
 
 https://www.youtube.com/watch?v=bpa_GQT16uM&feature=youtu.be
 
@@ -16,3 +18,14 @@ Start Go Web server
     ./scripts/start-local-server.sh
 
 If you like this, check out https://github.com/kaihendry/local-audio which builds on this.
+
+# Questions for Auth0
+
+https://s.natalian.org/2022-01-16/auth-forum.mp4
+
+1. How does one login via Github / Google Gmail address?
+2. Is "sub" the correct way to identify a user?
+3. What happens if user the logs in from Github/Gmail etc... are the identities merged?
+4. Did I correctly handle / validate the profile in [middleware](middleware.go)?
+5. How can I be confident the profile hasn't been manipulated?
+6. Profile appears to be an interface, is there a proper struct for it?
