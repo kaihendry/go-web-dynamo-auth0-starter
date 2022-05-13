@@ -45,6 +45,7 @@ func (s *server) list() http.HandlerFunc {
 		log.WithField("count", len(selection)).Info("parsed records")
 
 		w.Header().Set("Content-Type", "text/html")
+		w.Header().Set("X-version", Version)
 		err = t.ExecuteTemplate(w, "index.html", struct {
 			Selection []Record
 		}{

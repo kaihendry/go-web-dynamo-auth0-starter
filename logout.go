@@ -20,7 +20,7 @@ func (s *server) logout() http.HandlerFunc {
 		profile := session.Values["profile"]
 		log.WithField("profile", profile).Info("user")
 
-		logoutUrl, err := url.Parse("https://" + os.Getenv("AUTH0_DOMAIN") + "/v2/logout")
+		logoutUrl, err := url.Parse("https://" + s.config["AUTH0_DOMAIN"] + "/v2/logout")
 		log.WithFields(log.Fields{
 			"url":     logoutUrl,
 			"profile": profile,

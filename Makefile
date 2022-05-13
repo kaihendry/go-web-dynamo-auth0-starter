@@ -6,7 +6,7 @@ VERSION = 0.2
 DOMAINNAME = zero.dabase.com
 ACMCERTIFICATEARN = arn:aws:acm:ap-southeast-1:407461997746:certificate/87b0fd84-fb44-4782-b7eb-d9c7f8714908
 
-deploy:
+deploy: secrets.json
 	sam build
 	SAM_CLI_TELEMETRY=0 sam deploy --resolve-s3 --stack-name $(STACK) --parameter-overrides DomainName=$(DOMAINNAME) ACMCertificateArn=$(ACMCERTIFICATEARN) --no-confirm-changeset --no-fail-on-empty-changeset --capabilities CAPABILITY_IAM --disable-rollback
 

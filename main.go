@@ -4,6 +4,7 @@ import (
 	"context"
 	"embed"
 	"encoding/gob"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"html/template"
@@ -17,17 +18,17 @@ import (
 	jsonhandler "github.com/apex/log/handlers/json"
 	"github.com/apex/log/handlers/text"
 	"github.com/coreos/go-oidc/v3/oidc"
-	"github.com/driftprogramming/godotenv"
 	"github.com/gorilla/sessions"
 	"golang.org/x/oauth2"
 
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
 
-//go:embed envs/*
+//go:embed secrets.json
 var envs embed.FS
 
 var local = true
+var Version string
 
 type Record struct {
 	ID      string     `dynamodbav:"id" json:"id"`
@@ -41,6 +42,7 @@ type server struct {
 	client *dynamodb.Client
 	auth   *Authenticator
 	store  *sessions.CookieStore
+	config map[string]string
 }
 
 func (record *Record) TimeSinceCreation() string {
@@ -85,14 +87,25 @@ func (record *Record) TransparentBG() template.CSS {
 func newServer() *server {
 	s := &server{router: &http.ServeMux{}}
 
+	// I'm not sure why securecookie needs this, but it does.
 	gob.Register(map[string]interface{}{})
-	s.store = sessions.NewCookieStore([]byte(os.Getenv("SESSION_KEY")))
 
-	if err := godotenv.Load(envs, "envs/.env"); err != nil {
-		log.Fatalf("Failed to load the env vars: %v", err)
+	// load secrets.json from envs embedfs
+	secretJson, _ := envs.ReadFile("secrets.json")
+	// parse secretJson into s.config map
+	if err := json.Unmarshal(secretJson, &s.config); err != nil {
+		log.WithError(err).Fatal("unmarshalling secrets.json")
+	}
+	log.WithField("secrets", s.config).Info("loaded secrets")
+
+	// Check SESSION_KEY is set in the s.config map
+	if _, ok := s.config["SESSION_KEY"]; !ok {
+		log.Fatal("SESSION_KEY not set in secrets.json")
 	}
 
-	auth, err := New()
+	s.store = sessions.NewCookieStore([]byte(s.config["SESSION_KEY"]))
+
+	auth, err := New(s.config)
 	if err != nil {
 		log.Fatalf("Failed to initialize the authenticator: %v", err)
 	}
@@ -144,19 +157,19 @@ type Authenticator struct {
 }
 
 // New instantiates the *Authenticator.
-func New() (*Authenticator, error) {
+func New(config map[string]string) (*Authenticator, error) {
 	provider, err := oidc.NewProvider(
 		context.Background(),
-		"https://"+os.Getenv("AUTH0_DOMAIN")+"/",
+		"https://"+config["AUTH0_DOMAIN"]+"/",
 	)
 	if err != nil {
 		return nil, err
 	}
 
 	conf := oauth2.Config{
-		ClientID:     os.Getenv("AUTH0_CLIENT_ID"),
-		ClientSecret: os.Getenv("AUTH0_CLIENT_SECRET"),
-		RedirectURL:  os.Getenv("AUTH0_CALLBACK_URL"),
+		ClientID:     config["AUTH0_CLIENT_ID"],
+		ClientSecret: config["AUTH0_CLIENT_SECRET"],
+		RedirectURL:  config["AUTH0_CALLBACK_URL"],
 		Endpoint:     provider.Endpoint(),
 		Scopes:       []string{oidc.ScopeOpenID, "profile"},
 	}
