@@ -26,14 +26,15 @@ func (s *server) latest() http.HandlerFunc {
 			log.WithError(err).Fatal("couldn't build query expression")
 		}
 
-		records, err := s.client.Query(context.TODO(), &dynamodb.QueryInput{
+		queryInput := &dynamodb.QueryInput{
 			KeyConditionExpression:    expr.KeyCondition(),
 			ExpressionAttributeNames:  expr.Names(),
 			ExpressionAttributeValues: expr.Values(),
 			TableName:                 aws.String(os.Getenv("TABLE_NAME")),
 			ScanIndexForward:          aws.Bool(false),
 			Limit:                     aws.Int32(1),
-		})
+		}
+		records, err := s.client.Query(context.TODO(), queryInput)
 		if err != nil {
 			log.WithError(err).Fatal("couldn't get records")
 		}

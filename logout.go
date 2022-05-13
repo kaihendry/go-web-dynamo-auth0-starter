@@ -11,9 +11,19 @@ import (
 func (s *server) logout() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
+		session, err := s.store.Get(r, "session-name")
+		if err != nil {
+			log.WithError(err).Error("error getting session")
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		profile := session.Values["profile"]
+		log.WithField("profile", profile).Info("user")
+
 		logoutUrl, err := url.Parse("https://" + os.Getenv("AUTH0_DOMAIN") + "/v2/logout")
 		log.WithFields(log.Fields{
-			"url": logoutUrl,
+			"url":     logoutUrl,
+			"profile": profile,
 		}).Info("logouting user out")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -26,7 +36,7 @@ func (s *server) logout() http.HandlerFunc {
 		}
 
 		log.WithFields(log.Fields{
-			"scheme":  scheme,
+			"scheme": scheme,
 		}).Info("setting scheme")
 
 		log.WithField("host", r.Host).Info("returning to")

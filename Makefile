@@ -1,5 +1,5 @@
 STACK = zauth
-VERSION = 0.1
+VERSION = 0.2
 
 .PHONY: build deploy validate destroy
 
@@ -27,3 +27,7 @@ clean:
 
 sync:
 	sam sync --stack-name $(STACK) --watch
+
+# fetch aws secretsmanager SecretString out from auth0/fhwuGmCUqUr5Sk3NxwUgPT4yJAEu1a7Z
+secrets.json:
+	aws secretsmanager get-secret-value --secret-id auth0/fhwuGmCUqUr5Sk3NxwUgPT4yJAEu1a7Z --query SecretString --output text > secrets.json
